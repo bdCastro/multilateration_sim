@@ -36,19 +36,19 @@ void draw() {
   push();
   // Apply the scaling transformation
   // This affects everything drawn after this point
-  //translate(origin.x+mouseX, origin.y+mouseY);
-  //scale(scaleFactor);
-  //translate()
-  
+
   // translate
   if(translating) origin = new PVector(mouseX - clickOrigin.x, mouseY - clickOrigin.y);
-  if(moving) nearest.setPos(new PVector(mouseX - origin.x, mouseY - origin.y));
+  if(moving) nearest.setPos(new PVector((mouseX - origin.x)/scaleFactor, (mouseY - origin.y)/scaleFactor));
   
   translate(origin.x, origin.y);
+  scale(scaleFactor);
 
   background(25);
-  drawGrid(25);
   
+  // TODO: fix grid
+  drawGrid(25);
+ 
   // draw hyperbolas
   if(showHyperbolas) {
     for(int i = 0; i < sensors.size(); i++) {
@@ -91,14 +91,13 @@ void drawGrid(int spacing) {
   push();
   stroke(80);
   
-  int offsetX = -(int) (origin.x - (origin.x%spacing))/spacing;
-  int offsetY = -(int) (origin.y - (origin.y%spacing))/spacing;
-  
   // vertical lines
-  for(int i = offsetX; i <= (int) (width/spacing) + offsetX + 1; i++) line(i*spacing, -origin.y, i*spacing, height-origin.y);
+  for(int i = (int) (-origin.x/scaleFactor)/spacing; i < ((width-origin.x)/scaleFactor)/spacing; i++)
+    line(i*spacing, -origin.y/scaleFactor, i*spacing, (height-origin.y)/scaleFactor);
   
   // horizontal lines
-  for(int i = offsetY; i <= (int) (height/spacing) + offsetY + 1; i++) line(-origin.x, i*spacing, width-origin.x, i*spacing);
+  for(int i = (int) (-origin.y/scaleFactor)/spacing; i < ((height-origin.y)/scaleFactor)/spacing; i++)
+    line(-origin.x/scaleFactor, i*spacing, (width-origin.x)/scaleFactor, i*spacing);
   
   pop();
 }
@@ -230,14 +229,14 @@ void mousePressed() {
   if(mouseButton == RIGHT) {
     if(!translating) {
       translating = true;
-      clickOrigin = new PVector(mouseX - origin.x, mouseY - origin.y);
+      clickOrigin = new PVector(mouseX-origin.x, mouseY-origin.y);
     } else {
-      origin = new PVector(mouseX - clickOrigin.x, mouseY - clickOrigin.y);
+      origin = new PVector(mouseX-clickOrigin.x, mouseY-clickOrigin.y);
     }
   }
   
   if(mouseButton == LEFT) {
-    PVector mousePos = new PVector(mouseX - origin.x, mouseY - origin.y);
+    PVector mousePos = new PVector((mouseX - origin.x)/scaleFactor, (mouseY - origin.y)/scaleFactor);
     switch(mode) {
       case SELECT:
         if(aps.size() > 0 || sensors.size() > 0) {
@@ -312,6 +311,7 @@ void keyPressed() {
   loop();
 }
 
+PVector scaleV = new PVector(0, 0);
 float scaleFactor = 1.0; // Initial scale factor
 float minScale = 0.1;    // Minimum scale limit
 float maxScale = 5.0;    // Maximum scale limit
@@ -319,6 +319,7 @@ float maxScale = 5.0;    // Maximum scale limit
 void mouseWheel(MouseEvent event) {
   // Get the amount of scroll; positive for down, negative for up (on some systems)
   float change = event.getCount();
+  float oldScaleFactor = scaleFactor;
   
   // Adjust the scale factor based on the scroll amount
   // We use a small increment to make the zoom smooth
@@ -329,5 +330,9 @@ void mouseWheel(MouseEvent event) {
 
   // Note: If draw() is used, the screen will update automatically.
   // If you are not using a draw loop (e.g., in a static sketch), you might need to call redraw() here.
+  float sf = scaleFactor / oldScaleFactor;
+  origin = new PVector((origin.x-mouseX)*sf + mouseX, (origin.y-mouseY)*sf + mouseY);
+  // This is the crucial calculation to zoom around the mouse position
+  // Adjust translation to keep the point under the mouse static on the screen
   loop();
 }
