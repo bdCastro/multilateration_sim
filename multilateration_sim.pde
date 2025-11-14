@@ -91,13 +91,16 @@ void drawGrid(int spacing) {
   push();
   stroke(80);
   
+  PVector wOrigin = origin.copy().div(scaleFactor).mult(-1);
+  PVector wDest = new PVector(width-origin.x, height-origin.y).div(scaleFactor);
+  
   // vertical lines
-  for(int i = (int) (-origin.x/scaleFactor)/spacing; i < ((width-origin.x)/scaleFactor)/spacing; i++)
-    line(i*spacing, -origin.y/scaleFactor, i*spacing, (height-origin.y)/scaleFactor);
+  for(int i = (int) wOrigin.x/spacing; i < wDest.x/spacing; i++)
+    line(i*spacing, wOrigin.y, i*spacing, wDest.y);
   
   // horizontal lines
-  for(int i = (int) (-origin.y/scaleFactor)/spacing; i < ((height-origin.y)/scaleFactor)/spacing; i++)
-    line(-origin.x/scaleFactor, i*spacing, (width-origin.x)/scaleFactor, i*spacing);
+  for(int i = (int) wOrigin.y/spacing; i < wDest.y/spacing; i++)
+    line(wOrigin.x, i*spacing, wDest.x, i*spacing);
   
   pop();
 }
