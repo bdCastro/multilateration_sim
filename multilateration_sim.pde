@@ -25,6 +25,10 @@ boolean translating = false;
 boolean moving = false;
 
 PVector origin = new PVector(0, 0);
+
+float scaleFactor = 1.0; // Initial scale factor
+float minScale = 0.33;    // Minimum scale limit
+float maxScale = 3.0;    // Maximum scale limit
  
 void setup() {
   size(840, 480);
@@ -314,10 +318,6 @@ void keyPressed() {
   loop();
 }
 
-PVector scaleV = new PVector(0, 0);
-float scaleFactor = 1.0; // Initial scale factor
-float minScale = 0.1;    // Minimum scale limit
-float maxScale = 5.0;    // Maximum scale limit
 // This function is called automatically when the mouse wheel moves
 void mouseWheel(MouseEvent event) {
   // Get the amount of scroll; positive for down, negative for up (on some systems)
@@ -330,12 +330,8 @@ void mouseWheel(MouseEvent event) {
 
   // Constrain the scale factor within a sensible range
   scaleFactor = constrain(scaleFactor, minScale, maxScale);
-
-  // Note: If draw() is used, the screen will update automatically.
-  // If you are not using a draw loop (e.g., in a static sketch), you might need to call redraw() here.
   float sf = scaleFactor / oldScaleFactor;
   origin = new PVector((origin.x-mouseX)*sf + mouseX, (origin.y-mouseY)*sf + mouseY);
-  // This is the crucial calculation to zoom around the mouse position
-  // Adjust translation to keep the point under the mouse static on the screen
+
   loop();
 }
